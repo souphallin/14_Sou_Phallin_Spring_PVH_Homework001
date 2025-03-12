@@ -19,11 +19,11 @@ public class TicketController {
     public TicketController() {
         tickets.add(new Ticket(1, "WoEhEh", "12-03-2025", "Station A", "Station B", 15, true, "Booked", 3));
         tickets.add(new Ticket(2, "Sokha", "13-03-2025", "Station C", "Station D", 18, false, "Cancelled", 8));
-        tickets.add(new Ticket(3, "CoCa", "14-03-2025", "Station D", "Station C", 10, true, "Booked", 6));
+        tickets.add(new Ticket(3, "CoCa", "14-03-2025", "Station D", "Station C", 10, true, "Completed", 6));
         tickets.add(new Ticket(4, "Monorom", "12-03-2025", "Station G", "Station A", 16, true, "Booked", 6));
-        tickets.add(new Ticket(5, "Heng", "15-03-2025", "Station F", "Station D", 9, true, "Booked", 6));
+        tickets.add(new Ticket(5, "Heng", "15-03-2025", "Station F", "Station D", 9, true, "Completed", 6));
         tickets.add(new Ticket(6, "Lin", "14-03-2025", "Station B", "Station C", 5, true, "Booked", 6));
-        tickets.add(new Ticket(7, "Cheng", "17-03-2025", "Station A", "Station G", 3, true, "Booked", 6));
+        tickets.add(new Ticket(7, "Cheng", "17-03-2025", "Station A", "Station G", 3, true, "Cancelled", 6));
         tickets.add(new Ticket(8, "Sey", "17-03-2025", "Station A", "Station G", 3, true, "Booked", 6));
     }
 //--------------------------------------------------------------------------------------------------
@@ -55,6 +55,21 @@ public class TicketController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 //        return null;
+    }
+//--------------------------------------------------------------------------------------------------
+//    Filter By Ticket Status And Travel-Date
+    @GetMapping("/filterTicketStatusAndByTravelDate")
+    public ResponseEntity<List<Ticket>> filterByTravelDate(@RequestParam String filterByStatus, @RequestParam String filterByTravelDate) {
+        List<Ticket> ticketList = new ArrayList<>();
+        for (Ticket ticket : tickets) {
+            if (ticket.getTicketStatus().equalsIgnoreCase(filterByStatus) && ticket.getTravelDate().toLowerCase().equals(filterByTravelDate.toLowerCase())) {
+                ticketList.add(ticket);
+            }
+        }
+        if (ticketList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(ticketList);
     }
 //--------------------------------------------------------------------------------------------------
 //    Create One New Ticket
