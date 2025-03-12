@@ -91,13 +91,13 @@ public class TicketController {
 //--------------------------------------------------------------------------------------------------
     //    Create Multiple New Ticket
     @PostMapping("/CreateMultiNewTicket")
-    public ApiResponse<Ticket> createMultiNewTicket(@RequestBody List<TicketRequest> ticketRequest) {
+    public ResponseEntity<ApiResponse<List<Ticket>>> createMultiNewTicket(@RequestBody List<TicketRequest> ticketRequest) {
         int newId = tickets.size() + 1;
         List<Ticket> newTickets = new ArrayList<>();
 
         for (TicketRequest ticket : ticketRequest) {
             Ticket newTicket = new Ticket
-                    (newId, ticket.getPassengerName(), ticket.getTravelDate(),
+                    (newId++, ticket.getPassengerName(), ticket.getTravelDate(),
                             ticket.getSourceStation(), ticket.getDestinationStation(),
                             ticket.getPrice(), true, ticket.getTicketStatus(),
                             ticket.getSeatNumber()
@@ -105,7 +105,13 @@ public class TicketController {
             tickets.add(newTicket);
             newTickets.add(newTicket);
         }
-        return null;
+        if (newTickets.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(
+                    false, "No Ticket were Created", HttpStatus.BAD_REQUEST, null, LocalDateTime.now()
+            ));
+        }
+        ApiResponse<List<Ticket>> apiResponse = new ApiResponse<>(true, "Create New Ticket Successfully", HttpStatus.OK, newTickets, LocalDateTime.now());
+        return ResponseEntity.ok(apiResponse);
     }
 //--------------------------------------------------------------------------------------------------
 //    Delete ticket by ID
