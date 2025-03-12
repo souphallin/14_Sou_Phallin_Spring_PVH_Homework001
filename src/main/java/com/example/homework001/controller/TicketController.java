@@ -150,5 +150,21 @@ public class TicketController {
                 (false, "Ticket ID Not Found", HttpStatus.NOT_FOUND, null, LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
+//--------------------------------------------------------------------------------------------------
+//    Update ID and Payment Status
+    @PutMapping("/{updateByID}/{updatePaymentStatus}")
+    public ResponseEntity<ApiResponse<Ticket>> updateIDAndPaymentStatus(@PathVariable int updateByID, @PathVariable boolean updatePaymentStatus) {
+        for (Ticket ticket2 : tickets) {
+            if (ticket2.getId() == updateByID){
+                ticket2.setPaymentStatus(updatePaymentStatus);
 
+                ApiResponse<Ticket> updateResponse = new ApiResponse<>
+                        (true, "Update Successfully", HttpStatus.OK, ticket2, LocalDateTime.now());
+                return ResponseEntity.ok(updateResponse);
+            }
+        }
+        ApiResponse<Ticket> errorResponse = new ApiResponse<>
+                (false, "Ticket ID Not Found", HttpStatus.NOT_FOUND, null, LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
 }
