@@ -18,29 +18,81 @@ public class TicketController {
 
     public TicketController() {
         tickets.add(new Ticket(1, "WoEhEh", "12-03-2025", "Station A", "Station B", 15, true, "Booked", 3));
-        tickets.add(new Ticket(2, "Sokha", "13-03-2025", "Station A", "Station C", 18, false, "Cancelled", 8));
-        tickets.add(new Ticket(3, "CoCa", "14-03-2025", "Station A", "Station D", 15, true, "Booked", 6));
+        tickets.add(new Ticket(2, "Sokha", "13-03-2025", "Station C", "Station D", 18, false, "Cancelled", 8));
+        tickets.add(new Ticket(3, "CoCa", "14-03-2025", "Station D", "Station C", 10, true, "Booked", 6));
+        tickets.add(new Ticket(4, "Monorom", "12-03-2025", "Station G", "Station A", 16, true, "Booked", 6));
+        tickets.add(new Ticket(5, "Heng", "15-03-2025", "Station F", "Station D", 9, true, "Booked", 6));
+        tickets.add(new Ticket(6, "Lin", "14-03-2025", "Station B", "Station C", 5, true, "Booked", 6));
+        tickets.add(new Ticket(7, "Cheng", "17-03-2025", "Station A", "Station G", 3, true, "Booked", 6));
+        tickets.add(new Ticket(8, "Sey", "17-03-2025", "Station A", "Station G", 3, true, "Booked", 6));
     }
-
+//--------------------------------------------------------------------------------------------------
 //    Get All Tickets
     @GetMapping("/GetAllTickets")
     List<Ticket> getAllTickets() {
         return tickets;
     }
-
-//    Create a New Ticket
+//--------------------------------------------------------------------------------------------------
+//    Search by Name
+    @GetMapping("/search")
+    public List<Ticket> searchTicket(@RequestParam String passengerName) {
+        List<Ticket> ticketList = new ArrayList<>();
+        for (Ticket ticket : tickets) {
+            if (ticket.getPassengerName().toLowerCase().contains(passengerName.toLowerCase())) {
+                ticketList.add(ticket);
+            }
+        }
+        return ticketList;
+    }
+//--------------------------------------------------------------------------------------------------
+//    Get Ticket By ID
+    @GetMapping("/{getByID}")
+    public ResponseEntity<Ticket> getByID(@PathVariable Integer getByID) {
+        for (Ticket ticket : tickets) {
+            if (ticket.getId() == getByID) {
+                return ResponseEntity.ok(ticket);
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+//        return null;
+    }
+//--------------------------------------------------------------------------------------------------
+//    Create One New Ticket
     @PostMapping("/CreateANewTicket")
     public ResponseEntity<ApiResponse<Ticket>> createNewTicket(@RequestBody TicketRequest ticketRequest) {
         int newId = tickets.size() + 1;
-        Ticket newTicket = new Ticket(newId, ticketRequest.getPassengerName(), ticketRequest.getTravelDate(), ticketRequest.getSourceStation(), ticketRequest.getDestinationStation(), ticketRequest.getPrice(), true, ticketRequest.getTicketStatus(), ticketRequest.getSeatNumber());
+        Ticket newTicket = new Ticket
+                (newId, ticketRequest.getPassengerName(), ticketRequest.getTravelDate(),
+                        ticketRequest.getSourceStation(), ticketRequest.getDestinationStation(),
+                        ticketRequest.getPrice(), true, ticketRequest.getTicketStatus(),
+                        ticketRequest.getSeatNumber());
         tickets.add(newTicket);
-        
+
         ApiResponse<Ticket> apiResponse = new ApiResponse<>
                 (true, "Create Ticket Successfully", HttpStatus.OK, newTicket, LocalDateTime.now());
         
         return ResponseEntity.ok(apiResponse);
     }
+//--------------------------------------------------------------------------------------------------
+    //    Create Multiple New Ticket
+    @PostMapping("/CreateMultiNewTicket")
+    public ApiResponse<Ticket> createMultiNewTicket(@RequestBody List<TicketRequest> ticketRequest) {
+        int newId = tickets.size() + 1;
+        List<Ticket> newTickets = new ArrayList<>();
 
+        for (TicketRequest ticket : ticketRequest) {
+            Ticket newTicket = new Ticket
+                    (newId, ticket.getPassengerName(), ticket.getTravelDate(),
+                            ticket.getSourceStation(), ticket.getDestinationStation(),
+                            ticket.getPrice(), true, ticket.getTicketStatus(),
+                            ticket.getSeatNumber()
+                    );
+            tickets.add(newTicket);
+            newTickets.add(newTicket);
+        }
+        return null;
+    }
+//--------------------------------------------------------------------------------------------------
 //    Delete ticket by ID
     @DeleteMapping("/{deleteId}")
     public ResponseEntity<ApiResponse<Ticket>> deleteTicket(@PathVariable int deleteId) {
@@ -55,25 +107,14 @@ public class TicketController {
 //                return "Ticket deleted";
             }
         }
-        return null;
+        ApiResponse<Ticket> deleteNotFound = new ApiResponse<>
+                (false, "ID Not Found", HttpStatus.NOT_FOUND, null, LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(deleteNotFound);
     }
-
-//    Search by Name
-    @GetMapping("/search")
-    public List<Ticket> searchTicket(@RequestParam String passengerName) {
-        List<Ticket> ticketList = new ArrayList<>();
-        for (Ticket ticket : tickets) {
-            if (ticket.getPassengerName().toLowerCase().contains(passengerName.toLowerCase())) {
-                ticketList.add(ticket);
-            }
-        }
-        return ticketList;
-    }
-
+//--------------------------------------------------------------------------------------------------
 //    Update an existing tickets by ID
     @PutMapping("{updateId}")
     public ResponseEntity<ApiResponse<Ticket>> updateTicket(@PathVariable int updateId, @RequestBody TicketRequest ticketRequest) {
-
         for (Ticket ticket1 : tickets) {
             if (ticket1.getId() == updateId) {
                 ticket1.setPassengerName(ticketRequest.getPassengerName());
@@ -90,7 +131,9 @@ public class TicketController {
                 return ResponseEntity.ok(apiResponse);
             }
         }
-        return null;
+        ApiResponse<Ticket> errorResponse = new ApiResponse<>
+                (false, "Ticket ID Not Found", HttpStatus.NOT_FOUND, null, LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
 }
